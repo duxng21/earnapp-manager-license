@@ -20,6 +20,17 @@ create table if not exists licenses (
 
 create index if not exists idx_licenses_status on licenses(status);
 create index if not exists idx_licenses_machine_id on licenses(machine_id);
+
+create table if not exists app_updates (
+  id integer primary key default 1,
+  latest_version text,
+  download_url text,
+  sha256 text,
+  enabled boolean not null default false,
+  required boolean not null default false,
+  updated_at timestamptz not null default now(),
+  constraint app_updates_single_row check (id = 1)
+);
 ```
 
 Nên bật RLS. Vercel API dùng service role nên vẫn truy cập được.
@@ -57,8 +68,10 @@ API sẽ là:
 ```text
 POST https://earnapp-manager-license-server.vercel.app/api/activate
 POST https://earnapp-manager-license-server.vercel.app/api/verify
+GET  https://earnapp-manager-license-server.vercel.app/api/update/latest
 GET  https://earnapp-manager-license-server.vercel.app/api/admin/list-keys
 POST https://earnapp-manager-license-server.vercel.app/api/admin/create-key
+POST https://earnapp-manager-license-server.vercel.app/api/admin/save-update
 POST https://earnapp-manager-license-server.vercel.app/api/admin/block-key
 POST https://earnapp-manager-license-server.vercel.app/api/admin/unblock-key
 POST https://earnapp-manager-license-server.vercel.app/api/admin/reset-key
